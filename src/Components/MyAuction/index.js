@@ -2,14 +2,14 @@ import React, {Component} from 'react'
 import axios from 'axios'
 
 import MainItem from './MainItem'
-
+import moment from 'moment'
 const request = axios.create({
     baseURL: 'https://lelangbuana.herokuapp.com' || 'http://localhost:3000',
     timeout: 10000,
     headers: { Authorization: '' }
 })
 
-let myBids = []
+// let myBids = []
 class MyAuction extends Component {
     
     constructor(props) {
@@ -25,83 +25,43 @@ class MyAuction extends Component {
             myBids:[],
             username: '',
             end_date:'',
+            start_date:'',
             already_request: false
 
         }
     }
 
-    componentDidMount(){
-        // if (this.state.already_request){
-        //     return false
-        // }
-        //return false
-        // this.state.already_request = true
-        
+    UNSAFE_componentWillMount(){
+               
         request
             .get(`/auctions/user_id/${localStorage.getItem('user_id')}`)
-            .then((response) => response.data)
+            .then((response) => {
+                console.log('AUCTION DATA FORM USER ID : ',response.data)
+                return response.data
+            })
             .then(data => {
                 this.setState({
                     myAuctions: data,
                     already_request: true
                 })
-                // data.forEach(item => {
-
-                // request
-                //     .get(`/bids/auction_id/${item.auction_id}`)
-                //     .then(response => { 
-                            
-                //         const data = response.data.forEach(item => {
-                //             const { bids_nominal, username } = item
-                //             return {
-                //                 bids_nominal,
-                //                 username
-                //             }
-                //         })
-
-                //         this.setState({
-                //             myBids: data
-                //         })                            
-                //     })
-                //     .catch(error=> {error})
-                        
-                // this.setState(prevState => {
-                //     return {
-                //         myAuctions: prevState.myAuctions.concat({
-                //             title: item.title,
-                //             max_bid: item.max_bid,
-                //             min_bid: item.min_bid,
-                //             item_photo: item.item_photo,
-                //             end_date : item.end_date,
-                //             bidData: this.state
-                //         })
-                //     }
-                // })
-                // })
-                //console.log('AUCTIONS DATA: ', this.state.myAuctions)
+                console.log('DATA : ',this.state.myAuctions)
             })
             .catch(error=>{console.log(error)})        
     }
 
-    // shouldComponentUpdate(nextProps, nextState){
-    //     if (this.state.already_request){
-    //         console.log('helo')
-    //         return false
-    //     }
-    //     console.log('helo')
-    //     return true
-    // }
-    
 
     createAuctions(data, index) {
-        return <MainItem key={index} 
-            title={data.title}
-            max_bid={data.max_bid}
-            min_bid={data.min_bid}
-            item_photo={data.item_photo}
-            end_date = {data.end_date}
-            auction_id = { data.auction_id}
-        />
+        console.log('DATA : ', data.bids)
+        return (
+            <MainItem key={index} 
+                title={data.title}
+                bids={data.bids}
+                maxBid={data.max_bid}
+                minBid={data.min_bid}
+                itemPhoto={data.item_photo}
+                endDate = {data.end_date}
+                auctionId = { data.auction_id}
+            />)
     }
 
     render() {

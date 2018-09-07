@@ -5,8 +5,9 @@ import NumberFormat from 'react-number-format';
 import { connect } from 'react-redux'
 import {Row, Col, Form, 
     Input, Button,
-    UncontrolledTooltip} from 'reactstrap'
+    UncontrolledTooltip, Fade} from 'reactstrap'
 import moment from 'moment'
+import Loader from '../Assets/loader.gif'
 
 const styles = {
     text : {
@@ -37,7 +38,6 @@ const mapStateToProps = (state,props) => {
         quantity: state.auction.quantity,
         bids_nominal: state.bidData.bids_nominal,
         auction_id: state.auction.auction_id,
-        user_id: state.user.user_id,
         max_bid: state.auction.max_bid,
         min_bid: state.auction.min_bid,
         item_photo: state.auction.item_photo,
@@ -49,7 +49,8 @@ const mapStateToProps = (state,props) => {
         start_date: state.auction.start_date,
         end_date: state.auction.end_date,
         bids_multiply: state.auction.bids_multiply,
-        winner: state.auction.winner
+        winner: state.auction.winner,
+        user_id: state.auction.user_id
     }
 }
 
@@ -57,14 +58,17 @@ class DetailProductBidStatus extends Component{
     constructor(props){
         super(props)
         this.state={
-            bids_nominal: 0
+            bids_nominal: 0,
+            loading:true
         }
     }
 
-    componentDidMount(){}
+    componentDidMount(){
+        setTimeout(() => this.setState({ loading: false }), 1500)
+    }
 
     getInitialState(){
-        return ({amount: "0.00"});
+        return ({amount:"0.00"});
     }
 
     handleChange = (event,props) => {
@@ -151,26 +155,34 @@ class DetailProductBidStatus extends Component{
     }
 
     render(){
+        const { loading } = this.state
 
+        if(loading) { // if your component doesn't have to wait for an async action, remove this block 
+            return <div className="text-center"><img src={Loader} alt="loading..." className="mx-auto d-block" /></div>  // render null when app is not ready
+        }
+        
         let startBid
-        let enableCountDown
+        // let enableCountDown
         this.props.highest_bid>=this.props.start_bid
         ? startBid = this.props.highest_bid + this.props.bids_multiply
         : startBid = this.props.start_bid + this.props.bids_multiply
 
-        let now = Date.now()
-        let end = Date.parse(this.props.end_date)
-        let start = Date.parse(this.props.start_date)
+        // let now = Date.now()
+        // let end = Date.parse(this.props.end_date)
+        // let start = Date.parse(this.props.start_date)
 
-        now<=end
-        ? enableCountDown = <span>  date={ now + (end-now)}><h3>CLOSED</h3></span>
-        : enableCountDown = <h3>CLOSED</h3>
+        // now<=end
+        // ? enableCountDown = <span>  date={ now + (end-now)}><h3>CLOSED</h3></span>
+        // : enableCountDown = <h3>CLOSED</h3>
         
         
         let enableBid
-        console.log("STATUS: ", this.props.status)
+        console.log("USER: ", this.props.user_id)
         
-        this.props.status === "ongoing"
+        
+        this.props.user_id == localStorage.getItem("user_id")
+        ? enableBid = <div></div>
+        : this.props.status === "ongoing" 
         ? enableBid = 
             <div>
             <Row style={styles.contains}>
@@ -184,7 +196,7 @@ class DetailProductBidStatus extends Component{
                             type="number"
                             name="bid_nominal"
                             id="bid_nominal"
-                            placeholder="IDR "
+                            placeholder="IDR"
                             step={this.props.bids_multiply}
                             min={startBid}
                         />
@@ -227,7 +239,6 @@ class DetailProductBidStatus extends Component{
                     <Row style={styles.contains}><Col><span>
                     {this.props.end_date && moment(this.props.end_date).fromNow()}
                     <div>
-                    {/* <Countdown onComplete={this.auctionEnd} date={Date.now() + 10000} /> */}
                     </div>
                         </span></Col></Row>
                     <hr/>

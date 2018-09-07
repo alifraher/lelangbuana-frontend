@@ -3,7 +3,9 @@ import axios from 'axios'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import ReactFilestack from 'filestack-react'
-import DatePicker from 'react-datepicker';
+import DatePicker from 'react-datepicker'
+import { BrowserRouter as Link, Redirect } from 'react-router-dom'
+import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 
 import moment from 'moment'
 
@@ -12,7 +14,6 @@ import 'react-datepicker/dist/react-datepicker.css';
 
 
 import {
-    Button,
     Form,
     FormGroup,
     Label,
@@ -52,6 +53,7 @@ const keys = {
     filestackKey : 'AQulXUyRXS1GqTZvYuubfz'
 }
 
+
 const CustomInput = props => (
 <Input onClick={props.onClick} value={props.date.format('DD/MM/YYYY HH:mm')} />);
 
@@ -59,6 +61,7 @@ class CreateAnAuction1 extends Component {
     constructor (props) {
         super(props)
         this.state = {
+        success : false,
         user_id: 0,
         title: '',
         item_condition: '',
@@ -73,7 +76,8 @@ class CreateAnAuction1 extends Component {
         item_photo: '',
         status: 'ongoing',
         category_id: '1',
-        selectedFile : null
+        selectedFile : null,
+        redirectToReferrer : false
         };
         this.handleChangeDate = this.handleChangeDate.bind(this);
       }
@@ -93,12 +97,22 @@ class CreateAnAuction1 extends Component {
         }
     }
     
+    // toggle(){
+    //     this.setState({
+    //         modal: !this.state.modal
+    //       });
+    // }
+
     handleChange = event => {
         this.setState({ [event.target.name]: event.target.value })
     }
 
     handleSubmit = event => {
         event.preventDefault()
+
+        // this.setState({
+        //     modal: !this.state.modal
+        //   })
 
         const payload = {
             user_id: localStorage.getItem("user_id"),
@@ -120,12 +134,18 @@ class CreateAnAuction1 extends Component {
         request
             .post('/auctions', payload)
             .then(response => {
+                window.alert('Success Create Auction');
+                this.setState({success: true})
+                console.log("Message: ", response)
             })
             .catch(error => {
+                window.alert(`${error.response.data.message}`);
+                
                 console.log(error)
             }) 
                 
     }
+
     onSuccess = (result) => {
         this.setState({
           url: result.filesUploaded[0].url
@@ -137,7 +157,31 @@ class CreateAnAuction1 extends Component {
         console.error('error', error);
     } 
 
+    
+
     render() {
+
+       
+        // let  modals = (
+        // <div>
+        // {/* <Button color="danger" onClick={this.toggle}>{this.props.buttonLabel}</Button> */}
+        //     <Modal isOpen={this.state.modal} toggle={this.toggle} className={this.props.className}>
+        //         <ModalHeader toggle={this.toggle}>Modal title</ModalHeader>
+        //         <ModalBody>
+        //             Create Auction Success
+        //         </ModalBody>
+        //         <ModalFooter>
+        //         <Link to="/myauction"><Button color="primary" onClick={this.toggle}>OK</Button>{' '}</Link>
+        //             {/* <Button color="secondary" onClick={this.toggle}>Cancel</Button> */}
+        //         </ModalFooter>
+        //     </Modal>
+        // </div>)
+
+        if (this.state.success){
+            return (
+                <Redirect to={'/'}/>
+            )
+        } else {
         return (
             <Container>
                 <Row>
@@ -157,7 +201,7 @@ class CreateAnAuction1 extends Component {
                             </FormGroup>
                             <FormGroup row>
                                 <Label sm={3} for="quantity">Quantity</Label>
-                                <Col sm={9}>
+                                <Col sm={5}>
                                 <Input
                                     onChange={this.handleChange}
                                     type="number"
@@ -170,7 +214,7 @@ class CreateAnAuction1 extends Component {
                             </FormGroup>
                             <FormGroup row>
                                 <Label sm={3} for="minbid">Min. Bid Price</Label>
-                                <Col sm={9}>
+                                <Col sm={5}>
                                 <Input
                                     onChange={this.handleChange}
                                     type="number"
@@ -183,7 +227,7 @@ class CreateAnAuction1 extends Component {
                             </FormGroup>
                             <FormGroup row>
                                 <Label sm={3} for="maxbid">Max. Bid Price</Label>
-                                <Col sm={9}>
+                                <Col sm={5}>
                                 <Input
                                     onChange={this.handleChange}
                                     type="number"
@@ -196,7 +240,7 @@ class CreateAnAuction1 extends Component {
                             </FormGroup>
                             <FormGroup row>
                                 <Label sm={3} for="startdate">Start date</Label> 
-                                <Col sm={9}>
+                                <Col sm={5}>
                                 <DatePicker
                                     name="start_date"
                                     id="start_date"
@@ -208,11 +252,10 @@ class CreateAnAuction1 extends Component {
                             </FormGroup>
                             <FormGroup row>
                                 <Label sm={3} for="closingdate">Closing date</Label>                
-                                <Col sm={9}>
+                                <Col sm={5}>
                                 <DatePicker
                                     name="end_date"
                                     id="end_date"
-                                    isClearable={true}
                                     selected={this.state.end_date}
                                     onChange={this.handleChangeDate}
                                     showTimeSelect
@@ -228,7 +271,7 @@ class CreateAnAuction1 extends Component {
                                 <Label sm={3} for="item_condition">
                                     Item Condition
                                 </Label>
-                                <Col sm={9}>
+                                <Col sm={5}>
                                 <Input
                                 onChange={this.handleChange} 
                                 type="select" 
@@ -248,7 +291,7 @@ class CreateAnAuction1 extends Component {
                                 <Label sm={3} for="bidincrement">
                                     Bid Increment (IDR )
                                 </Label>
-                                <Col sm={9}>
+                                <Col sm={5}>
                                 <Input 
                                 onChange={this.handleChange}
                                 type="select" 
@@ -293,11 +336,13 @@ class CreateAnAuction1 extends Component {
                             </Col>
                         </FormGroup>
                             <Button style={styles.button} onClick={this.props.handleSubmit} block>Submit</Button>
+                            
                         </Form>
                     </Col>
                 </Row>
             </Container>
         )
+        }
     }
 }
 

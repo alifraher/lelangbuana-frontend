@@ -1,6 +1,7 @@
 import React from 'react'
 import {connect} from 'react-redux'
 import axios from 'axios'
+import Loader from '../Assets/loader.gif'
 
 import {
     TabContent,
@@ -44,15 +45,15 @@ class DetailProductDetailPages extends React.Component {
         super(props)
         this.toggle = this.toggle.bind(this)
         this.state = {
-            activeTab: '1'
+            activeTab: '1',
+            loading: true
         }
     }
 
-    componentWillMount(){
+    UNSAFE_componentWillMount(){
         request
             .get(`/auctions/${this.props.params}`)
             .then(response => {
-            // console.log('BIDS HISTORY: ', response.data.bids)
                 response.data.bids.map(item => {
                     return(
                         bids.push({
@@ -62,12 +63,7 @@ class DetailProductDetailPages extends React.Component {
                             status: item.status,
                             user_id: item.user_id })
                     )
-                // return 
                 })
-
-            // return (bids)
-            
-
             })
             .catch(error=>{
                 console.log(error)
@@ -75,7 +71,9 @@ class DetailProductDetailPages extends React.Component {
         console.log('BID DATA HISTORIES:  ', bids)
     }
 
-    componentDidMount(){}
+    componentDidMount(){
+        setTimeout(() => this.setState({ loading: false }), 1500)
+    }
 
     toggle(tab) {
         if (this.state.activeTab !== tab) {
@@ -86,7 +84,7 @@ class DetailProductDetailPages extends React.Component {
     }
 
     createBidsHistories(item,index){
-        <Col>
+        <Col key={index}>
             <p>AUCTION : {item.auction_id}</p>
             <p>BIDS : {item.bids_nominal}</p>
             <p>STATUS : {item.status}</p>
@@ -95,9 +93,13 @@ class DetailProductDetailPages extends React.Component {
     }
 
     render() {
+        const { loading } = this.state
+
+        if(loading) { // if your component doesn't have to wait for an async action, remove this block 
+            return <div className="text-center"><img src={Loader} alt="loading..." className="mx-auto d-block" /></div>  // render null when app is not ready
+        }
 
         let bids_histories= bids.map((item,index)=> {
-            console.log('BIDDDDD : ', item)
             return (
                 <Col key={index}>
                     <p>AUCTION : {item.auction_id}</p>
@@ -136,7 +138,7 @@ class DetailProductDetailPages extends React.Component {
                             Seller Info
                         </NavLink>
                     </NavItem>
-                    <NavItem>
+                    {/* <NavItem>
                         <NavLink
                             to="/"
                             className={classnames({
@@ -148,7 +150,7 @@ class DetailProductDetailPages extends React.Component {
                         >
                             Bid History
                         </NavLink>
-                    </NavItem>
+                    </NavItem> */}
                 </Nav>
 
                 <TabContent activeTab={this.state.activeTab}>
@@ -173,11 +175,11 @@ class DetailProductDetailPages extends React.Component {
                             </Col>
                         </Row>
                     </TabPane>
-                    <TabPane tabId="3">
+                    {/* <TabPane tabId="3">
                         <Row>
                             {bids_histories}
                         </Row>
-                    </TabPane>
+                    </TabPane> */}
                 </TabContent>
             </div>
         )
