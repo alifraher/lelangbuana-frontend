@@ -17,25 +17,81 @@ const styles = {
 }
 
 const nowDate = moment()
+let user_id
 
 class DetailItem extends React.Component {
 
     constructor(props){
         super(props)
         this.state={
-            myBids: []
+            myBids: [],
+            username:'',
+            bids: this.props.bids,
+            highest_bid: 0,
+            user_id: 0
         }
     }
     
+    createDetail(item, index){
+        if(item.bids_nominal>this.state.bids_nominal)
+        {
+            this.setState({
+                highest_bid:item.bids_nominal,
+
+            })
+        }
+    }
     render(){
+        
         let highestBid = 0
+        let username
+        let phone
         const Detail = this.props.bids.forEach(item => {
             if (item.bids_nominal>highestBid)
             {
                 highestBid=item.bids_nominal
+                user_id=item.user_id
+                    
+                
             }
-            return highestBid
-            // return <tr><td>{item}</td></tr>
+            if(user_id===1)
+            {
+                username='guntur'
+                phone='+628117777547'
+            }
+            else if(user_id===2)
+            {
+                username='fadillah'
+                phone='+6281268338419'
+            }
+            else if(user_id===3)
+            {
+                username='maya'
+                phone='=6281947677203'
+            }
+            else if(user_id===4)
+            {
+                username='alif'
+                phone='+6285760552600'
+            }
+            else 
+            {
+                username=user_id
+                phone=''
+            }
+            // request
+            //     .get(`/users/id/${user_id}`)
+            //     .then(response => {
+            //         console.log('Response : ', response.data.user.username)
+            //         this.setState(
+            //             {
+            //                 username:response.data.user.username
+
+            //             }
+            //         )
+                    
+            //     })
+            return (highestBid, username, phone)
         })
         console.log('BID HIGHEST: ',highestBid)
 
@@ -50,6 +106,8 @@ class DetailItem extends React.Component {
                                     <th>Time</th>
                                     <th>Closed Date</th>
                                     <th>Closed Time</th>
+                                    <th>Highest Bidder</th>
+                                    <th>Phone Number</th>
                                     <th>Bid Price</th>
                                     {/* <th>Status</th> */}
                                 </tr>
@@ -61,7 +119,8 @@ class DetailItem extends React.Component {
                                     <td>{nowDate.format('LT')}</td>
                                     <td>{moment(this.props.endDate).format('ll')}</td>
                                     <td>{moment(this.props.endDate).format('LT')}</td>
-                                    {/* <td>{this.props.username} </td> */}
+                                    <td>{username} </td>
+                                    <td>{phone}</td>
                                     <td><NumberFormat value={highestBid} displayType={'text'} thousandSeparator={true} prefix={'IDR '}/></td>
                                     {/* <td>Success</td> */}
                                 </tr>
